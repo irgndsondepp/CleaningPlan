@@ -8,15 +8,14 @@ import (
 
 	"io/ioutil"
 
-	"encoding/xml"
-
 	"os"
 
 	"github.com/irgndsondepp/cleaningplan"
 )
 
 var cleaningPlan = cleaningplan.NewCleaningPlan()
-var fileName = "./plan.xml"
+var fileNameXML = "./plan.xml"
+var fileNameJSON = "./plan.json"
 
 func main() {
 	loadPlanFromFile()
@@ -28,20 +27,20 @@ func main() {
 }
 
 func loadPlanFromFile() {
-	ex, err := exists(fileName)
+	ex, err := exists(fileNameXML)
 	if err != nil {
 		fmt.Println("Error checking if file exists: %v", err)
 	}
 	if !ex {
 		cleaningPlan = cleaningplan.InitCleaningPlan()
 	}
-	bytes, err := ioutil.ReadFile(fileName)
+	bytes, err := ioutil.ReadFile(fileNameXML)
 	if err != nil {
 		return
 	}
-	err = xml.Unmarshal(bytes, cleaningPlan)
+	cleaningPlan, err = cleaningplan.FromXML(bytes)
 	if err != nil {
-		fmt.Println("Error decoding file...")
+		fmt.Printf("Error decoding file: %v\n", err)
 		cleaningPlan = cleaningplan.InitCleaningPlan()
 	}
 }
@@ -60,9 +59,9 @@ func exists(path string) (bool, error) {
 func savePlanToFile() {
 	bytes, err := cleaningPlan.ToXML()
 	if err != nil {
-		fmt.Printf("Error trying to Encode Plan to XML: %v\n", err)
+		fmt.Printf("Error trying to Encode Plan: %v\n", err)
 	}
-	err = ioutil.WriteFile(fileName, bytes, 0644)
+	err = ioutil.WriteFile(fileNameXML, bytes, 0644)
 	if err != nil {
 		fmt.Printf("Error saving file: %v", err)
 	}
@@ -104,15 +103,28 @@ func parseInput(url string) []string {
 }
 
 func printCleaningPlan(w http.ResponseWriter, req *http.Request) {
-	w.Header().Add("Content", "text/xml")
-	printXML(w)
-}
-
-func printXML(w http.ResponseWriter) {
-	bytes, err := cleaningPlan.ToXML()
+	err := printJSON(w)
 	if err != nil {
 		fmt.Fprintln(w, err)
-	} else {
-		w.Write(bytes)
 	}
+}
+
+func printJSON(w http.ResponseWriter) error {
+	w.Header().Add("Content", "application/json")
+	bytes, err := cleaningPlan.ToJSON()
+	if err != nil {
+		return err
+	}
+	w.Write(bytes)
+	return nil
+}
+
+func printXML(w http.ResponseWriter) error {
+	w.Header().Add("Content", "text/xml")
+	bytes, err := cleaningPlan.ToXML()
+	if err != nil {
+		return err
+	}
+	w.Write(bytes)
+	return nil
 }

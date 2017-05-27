@@ -4,8 +4,8 @@ import "time"
 import "fmt"
 
 type Cleanjob struct {
-	Roomname string    `xml:"RoomName"`
-	LastDone time.Time `xml:"LastDone"`
+	Roomname string    `xml:"RoomName" json:"RoomName"`
+	LastDone time.Time `xml:"LastDone" json:"LastDone"`
 }
 
 func NewCleanJob(roomName string, lastDone time.Time) *Cleanjob {

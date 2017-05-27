@@ -1,6 +1,7 @@
 package cleaningplan
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"strings"
@@ -8,7 +9,7 @@ import (
 )
 
 type CleaningPlan struct {
-	Flatmates []*Flatmate `xml:"Flatmates"`
+	Flatmates []*Flatmate `xml:"Flatmates" json:"Flatmates"`
 }
 
 func NewCleaningPlan() *CleaningPlan {
@@ -68,4 +69,20 @@ func (cp *CleaningPlan) ToString() string {
 
 func (cp *CleaningPlan) ToXML() ([]byte, error) {
 	return xml.MarshalIndent(cp, "", "\t")
+}
+
+func (cp *CleaningPlan) ToJSON() ([]byte, error) {
+	return json.MarshalIndent(cp, "", "\t")
+}
+
+func FromJSON(bytes []byte) (*CleaningPlan, error) {
+	cleaningPlan := CleaningPlan{}
+	err := json.Unmarshal(bytes, cleaningPlan)
+	return &cleaningPlan, err
+}
+
+func FromXML(bytes []byte) (*CleaningPlan, error) {
+	cleaningPlan := CleaningPlan{}
+	err := xml.Unmarshal(bytes, cleaningPlan)
+	return &cleaningPlan, err
 }

@@ -7,8 +7,8 @@ import (
 )
 
 type Flatmate struct {
-	Name string      `xml:"Name"`
-	Jobs []*Cleanjob `xml:"Cleanjobs"`
+	Name string      `xml:"Name" json:"Name"`
+	Jobs []*Cleanjob `xml:"Cleanjobs" json:"Cleanjobs"`
 }
 
 func NewFlatmate(name string) *Flatmate {
