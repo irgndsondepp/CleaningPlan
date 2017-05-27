@@ -1,6 +1,7 @@
 package cleaningplan
 
 import (
+	"encoding/xml"
 	"errors"
 	"strings"
 	"time"
@@ -63,4 +64,8 @@ func (cp *CleaningPlan) ToString() string {
 		msg += fm.ToString()
 	}
 	return msg
+}
+
+func (cp *CleaningPlan) ToXML() ([]byte, error) {
+	return xml.MarshalIndent(cp, "", "\t")
 }

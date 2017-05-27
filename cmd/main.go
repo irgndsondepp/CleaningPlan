@@ -58,7 +58,7 @@ func exists(path string) (bool, error) {
 }
 
 func savePlanToFile() {
-	bytes, err := xml.MarshalIndent(cleaningPlan, "", "\t")
+	bytes, err := cleaningPlan.ToXML()
 	if err != nil {
 		fmt.Printf("Error trying to Encode Plan to XML: %v\n", err)
 	}
@@ -104,8 +104,15 @@ func parseInput(url string) []string {
 }
 
 func printCleaningPlan(w http.ResponseWriter, req *http.Request) {
-	_, err := fmt.Fprintln(w, cleaningPlan.ToString())
+	w.Header().Add("Content", "text/xml")
+	printXML(w)
+}
+
+func printXML(w http.ResponseWriter) {
+	bytes, err := cleaningPlan.ToXML()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(w, err)
+	} else {
+		w.Write(bytes)
 	}
 }
