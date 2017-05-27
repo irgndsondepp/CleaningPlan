@@ -27,18 +27,18 @@ func main() {
 }
 
 func loadPlanFromFile() {
-	ex, err := exists(fileNameXML)
+	ex, err := exists(fileNameJSON)
 	if err != nil {
 		fmt.Println("Error checking if file exists: %v", err)
 	}
 	if !ex {
 		cleaningPlan = cleaningplan.InitCleaningPlan()
 	}
-	bytes, err := ioutil.ReadFile(fileNameXML)
+	bytes, err := ioutil.ReadFile(fileNameJSON)
 	if err != nil {
 		return
 	}
-	cleaningPlan, err = cleaningplan.FromXML(bytes)
+	cleaningPlan, err = cleaningplan.FromJSON(bytes)
 	if err != nil {
 		fmt.Printf("Error decoding file: %v\n", err)
 		cleaningPlan = cleaningplan.InitCleaningPlan()
@@ -57,11 +57,11 @@ func exists(path string) (bool, error) {
 }
 
 func savePlanToFile() {
-	bytes, err := cleaningPlan.ToXML()
+	bytes, err := cleaningPlan.ToJSON()
 	if err != nil {
 		fmt.Printf("Error trying to Encode Plan: %v\n", err)
 	}
-	err = ioutil.WriteFile(fileNameXML, bytes, 0644)
+	err = ioutil.WriteFile(fileNameJSON, bytes, 0644)
 	if err != nil {
 		fmt.Printf("Error saving file: %v", err)
 	}
@@ -69,10 +69,14 @@ func savePlanToFile() {
 
 func handleInput(w http.ResponseWriter, req *http.Request) {
 	reqUri := req.RequestURI
-	if strings.Contains(reqUri, "/done") {
+	if strings.Contains(reqUri, "/done/") {
 		setJobAsDone(w, reqUri)
+	} else if strings.Contains(reqUri, "/xml/") {
+		printCleaningPlan(w, cleaningplan.XML)
+	} else if strings.Contains(reqUri, "/json/") {
+		printCleaningPlan(w, cleaningplan.JSON)
 	} else {
-		printCleaningPlan(w, req)
+		printCleaningPlan(w, cleaningplan.Unformatted)
 	}
 }
 
@@ -102,8 +106,16 @@ func parseInput(url string) []string {
 	return res
 }
 
-func printCleaningPlan(w http.ResponseWriter, req *http.Request) {
-	err := printJSON(w)
+func printCleaningPlan(w http.ResponseWriter, formatting cleaningplan.Formatting) {
+	var err error
+	switch formatting {
+	case cleaningplan.JSON:
+		err = printJSON(w)
+	case cleaningplan.XML:
+		err = printXML(w)
+	default:
+		fmt.Fprintln(w, cleaningPlan.ToString())
+	}
 	if err != nil {
 		fmt.Fprintln(w, err)
 	}

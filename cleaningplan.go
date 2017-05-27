@@ -77,12 +77,12 @@ func (cp *CleaningPlan) ToJSON() ([]byte, error) {
 
 func FromJSON(bytes []byte) (*CleaningPlan, error) {
 	cleaningPlan := CleaningPlan{}
-	err := json.Unmarshal(bytes, cleaningPlan)
+	err := json.Unmarshal(bytes, &cleaningPlan)
 	return &cleaningPlan, err
 }
 
 func FromXML(bytes []byte) (*CleaningPlan, error) {
 	cleaningPlan := CleaningPlan{}
-	err := xml.Unmarshal(bytes, cleaningPlan)
+	err := xml.Unmarshal(bytes, &cleaningPlan)
 	return &cleaningPlan, err
 }
