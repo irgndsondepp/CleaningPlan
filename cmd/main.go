@@ -8,15 +8,14 @@ import (
 
 	"io/ioutil"
 
-	"encoding/xml"
-
 	"os"
 
 	"github.com/irgndsondepp/cleaningplan"
 )
 
 var cleaningPlan = cleaningplan.NewCleaningPlan()
-var fileName = "./plan.xml"
+var fileNameXML = "./plan.xml"
+var fileNameJSON = "./plan.json"
 
 func main() {
 	loadPlanFromFile()
@@ -28,20 +27,20 @@ func main() {
 }
 
 func loadPlanFromFile() {
-	ex, err := exists(fileName)
+	ex, err := exists(fileNameJSON)
 	if err != nil {
 		fmt.Println("Error checking if file exists: %v", err)
 	}
 	if !ex {
 		cleaningPlan = cleaningplan.InitCleaningPlan()
 	}
-	bytes, err := ioutil.ReadFile(fileName)
+	bytes, err := ioutil.ReadFile(fileNameJSON)
 	if err != nil {
 		return
 	}
-	err = xml.Unmarshal(bytes, cleaningPlan)
+	cleaningPlan, err = cleaningplan.FromJSON(bytes)
 	if err != nil {
-		fmt.Println("Error decoding file...")
+		fmt.Printf("Error decoding file: %v\n", err)
 		cleaningPlan = cleaningplan.InitCleaningPlan()
 	}
 }
@@ -58,11 +57,11 @@ func exists(path string) (bool, error) {
 }
 
 func savePlanToFile() {
-	bytes, err := cleaningPlan.ToXML()
+	bytes, err := cleaningPlan.ToJSON()
 	if err != nil {
-		fmt.Printf("Error trying to Encode Plan to XML: %v\n", err)
+		fmt.Printf("Error trying to Encode Plan: %v\n", err)
 	}
-	err = ioutil.WriteFile(fileName, bytes, 0644)
+	err = ioutil.WriteFile(fileNameJSON, bytes, 0644)
 	if err != nil {
 		fmt.Printf("Error saving file: %v", err)
 	}
@@ -70,10 +69,14 @@ func savePlanToFile() {
 
 func handleInput(w http.ResponseWriter, req *http.Request) {
 	reqUri := req.RequestURI
-	if strings.Contains(reqUri, "/done") {
+	if strings.Contains(reqUri, "/done/") {
 		setJobAsDone(w, reqUri)
+	} else if strings.Contains(reqUri, "/xml/") {
+		printCleaningPlan(w, cleaningplan.XML)
+	} else if strings.Contains(reqUri, "/json/") {
+		printCleaningPlan(w, cleaningplan.JSON)
 	} else {
-		printCleaningPlan(w, req)
+		printCleaningPlan(w, cleaningplan.Unformatted)
 	}
 }
 
@@ -103,16 +106,37 @@ func parseInput(url string) []string {
 	return res
 }
 
-func printCleaningPlan(w http.ResponseWriter, req *http.Request) {
-	w.Header().Add("Content", "text/xml")
-	printXML(w)
-}
-
-func printXML(w http.ResponseWriter) {
-	bytes, err := cleaningPlan.ToXML()
+func printCleaningPlan(w http.ResponseWriter, formatting cleaningplan.Formatting) {
+	var err error
+	switch formatting {
+	case cleaningplan.JSON:
+		err = printJSON(w)
+	case cleaningplan.XML:
+		err = printXML(w)
+	default:
+		fmt.Fprintln(w, cleaningPlan.ToString())
+	}
 	if err != nil {
 		fmt.Fprintln(w, err)
-	} else {
-		w.Write(bytes)
 	}
+}
+
+func printJSON(w http.ResponseWriter) error {
+	w.Header().Add("Content", "application/json")
+	bytes, err := cleaningPlan.ToJSON()
+	if err != nil {
+		return err
+	}
+	w.Write(bytes)
+	return nil
+}
+
+func printXML(w http.ResponseWriter) error {
+	w.Header().Add("Content", "text/xml")
+	bytes, err := cleaningPlan.ToXML()
+	if err != nil {
+		return err
+	}
+	w.Write(bytes)
+	return nil
 }
