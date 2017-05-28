@@ -6,4 +6,9 @@ default:
 build-main:
 	go build $(PKG)/main.go
 
+test:
+	go test
+	go test ./people
+	go test ./people/tasks
+
 .PHONY: build-main

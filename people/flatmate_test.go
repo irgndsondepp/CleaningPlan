@@ -12,7 +12,7 @@ var taskName = "Hello"
 func TestNewFlatmate(t *testing.T) {
 	name := "Dude"
 	fm := NewFlatmate(name)
-	if !strings.EqualFold(name, fm.Name) {
+	if !strings.EqualFold(name, fm.Name()) {
 		t.Errorf("Expected %v but Name was %v", name, fm.Name)
 	}
 	if len(fm.Jobs) != 0 {
