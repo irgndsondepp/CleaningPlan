@@ -6,10 +6,31 @@ import (
 	"errors"
 	"strings"
 	"time"
+
+	"github.com/irgndsondepp/cleaningplan/people"
+	"github.com/irgndsondepp/cleaningplan/people/tasks"
 )
 
 type CleaningPlan struct {
-	Flatmates []*Flatmate `xml:"Flatmates" json:"Flatmates"`
+	People []people.People `xml:"People" json:"People"`
+}
+
+type specificCleaningPlan struct {
+	People []*people.SpecificFlatmate `xml:"People" json:"People"`
+}
+
+func newSpecificCleaningPlan() *specificCleaningPlan {
+	return &specificCleaningPlan{}
+}
+
+func (s *specificCleaningPlan) ToSimpleCleaningPlan() *CleaningPlan {
+	cp := CleaningPlan{}
+	var pep []people.People
+	for _, p := range s.People {
+		pep = append(pep, p.ToSimpleFlatmate())
+	}
+	cp.People = pep
+	return &cp
 }
 
 func NewCleaningPlan() *CleaningPlan {
@@ -18,28 +39,28 @@ func NewCleaningPlan() *CleaningPlan {
 }
 
 func InitCleaningPlan() *CleaningPlan {
-	benni := NewFlatmate("Benni")
-	benni.AddCleanJob(NewCleanJob("LivingRoom", SimpleDate(2017, 3, 21)))
+	benni := people.NewFlatmate("Benni")
+	benni.AddJob(tasks.NewCleanJob("LivingRoom", SimpleDate(2017, 3, 21)))
 
-	markus := NewFlatmate("Markus")
-	markus.AddCleanJob(NewCleanJob("Kitchen", SimpleDate(2016, 10, 3)))
-	markus.AddCleanJob(NewCleanJob("Bath", SimpleDate(2017, 5, 27)))
+	markus := people.NewFlatmate("Markus")
+	markus.AddJob(tasks.NewCleanJob("Kitchen", SimpleDate(2016, 10, 3)))
+	markus.AddJob(tasks.NewCleanJob("Bath", SimpleDate(2017, 5, 27)))
 
-	robert := NewFlatmate("Robert")
+	robert := people.NewFlatmate("Robert")
 
-	fms := []*Flatmate{markus, benni, robert}
+	fms := []people.People{markus, benni, robert}
 	cp := CleaningPlan{
-		Flatmates: fms,
+		People: fms,
 	}
 	return &cp
 }
 
 func (cp *CleaningPlan) MarkJobAsDone(flatMate, roomName string) error {
-	var job *Cleanjob
+	var job tasks.Doable
 	var err error
 	j := -1
-	for i, fm := range cp.Flatmates {
-		if strings.ToLower(fm.Name) == strings.ToLower(flatMate) {
+	for i, fm := range cp.People {
+		if strings.ToLower(fm.Name()) == strings.ToLower(flatMate) {
 			job, err = fm.MarkJobAsDone(roomName)
 			if err != nil {
 				return err
@@ -50,8 +71,8 @@ func (cp *CleaningPlan) MarkJobAsDone(flatMate, roomName string) error {
 	if job == nil {
 		return errors.New("No flatmate found.")
 	}
-	j = (j + 1) % len(cp.Flatmates)
-	cp.Flatmates[j].AddCleanJob(job)
+	j = (j + 1) % len(cp.People)
+	cp.People[j].AddJob(job)
 	return nil
 }
 
@@ -61,7 +82,7 @@ func SimpleDate(year int, month time.Month, day int) time.Time {
 
 func (cp *CleaningPlan) ToString() string {
 	msg := ""
-	for _, fm := range cp.Flatmates {
+	for _, fm := range cp.People {
 		msg += fm.ToString()
 	}
 	return msg
@@ -76,13 +97,13 @@ func (cp *CleaningPlan) ToJSON() ([]byte, error) {
 }
 
 func FromJSON(bytes []byte) (*CleaningPlan, error) {
-	cleaningPlan := CleaningPlan{}
+	cleaningPlan := newSpecificCleaningPlan()
 	err := json.Unmarshal(bytes, &cleaningPlan)
-	return &cleaningPlan, err
+	return cleaningPlan.ToSimpleCleaningPlan(), err
 }
 
 func FromXML(bytes []byte) (*CleaningPlan, error) {
-	cleaningPlan := CleaningPlan{}
+	cleaningPlan := newSpecificCleaningPlan()
 	err := xml.Unmarshal(bytes, &cleaningPlan)
-	return &cleaningPlan, err
+	return cleaningPlan.ToSimpleCleaningPlan(), err
 }

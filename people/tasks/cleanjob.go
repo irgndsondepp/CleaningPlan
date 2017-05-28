@@ -1,7 +1,13 @@
-package cleaningplan
+package tasks
 
 import "time"
 import "fmt"
+
+type Doable interface {
+	Name() string
+	MarkAsDone()
+	ToString() string
+}
 
 type Cleanjob struct {
 	Roomname string    `xml:"RoomName" json:"RoomName"`
@@ -18,6 +24,10 @@ func NewCleanJob(roomName string, lastDone time.Time) *Cleanjob {
 
 func (cj *Cleanjob) MarkAsDone() {
 	cj.LastDone = time.Now()
+}
+
+func (cj *Cleanjob) Name() string {
+	return cj.Roomname
 }
 
 func (c *Cleanjob) ToString() string {
