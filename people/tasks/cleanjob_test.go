@@ -50,3 +50,24 @@ func TestMarkAsDone(t *testing.T) {
 		t.Errorf("Expected %v but LastDone.Day was %v", now.Day(), cj.LastDone.Day())
 	}
 }
+
+func TestOverdue(t *testing.T) {
+	now := time.Now()
+	lastDone := getSimpleDate(now.Year(), now.Month(), now.Day())
+	cj := createCleanJobWithDate("hello", lastDone)
+	if cj.getColorDependingOnTimePassed() != InWeek {
+		t.Errorf("Task was overdue: %v, colored %v", cj.LastDone, cj.getColorDependingOnTimePassed())
+	}
+	lastYear := time.Now().AddDate(-1, 0, 0)
+	lastDone = getSimpleDate(lastYear.Year(), lastYear.Month(), lastYear.Day())
+	cj = createCleanJobWithDate("hello2", lastDone)
+	if cj.getColorDependingOnTimePassed() != Overdue {
+		t.Errorf("Task was not overdue: %v, colored %v", cj.LastDone, cj.getColorDependingOnTimePassed())
+	}
+	lastWeek := time.Now().AddDate(0, 0, -8)
+	lastDone = getSimpleDate(lastWeek.Year(), lastWeek.Month(), lastWeek.Day())
+	cj = createCleanJobWithDate("hello3", lastDone)
+	if cj.getColorDependingOnTimePassed() != InLastTwoWeeks {
+		t.Errorf("Task was not in lastTwoWeeks: %v, colored %v", cj.LastDone, cj.getColorDependingOnTimePassed())
+	}
+}

@@ -40,17 +40,24 @@ func (c *Cleanjob) ToHtml() string {
 }
 
 func (c *Cleanjob) colorLastDoneInHtml() string {
-	if c.isOverdue() {
-		return fmt.Sprintf("<font color=\"red\">%v</font>", c.ToString())
-	} else {
-		return fmt.Sprintf("<font color=\"green\">%v</font>", c.ToString())
-	}
+	color := c.getColorDependingOnTimePassed()
+	return fmt.Sprintf("<font color=\"%v\">%v</font>", color, c.ToString())
 }
 
-func (c *Cleanjob) isOverdue() bool {
+func (c *Cleanjob) getColorDependingOnTimePassed() string {
 	aWeekAgo := time.Now().AddDate(0, 0, -7)
 	if aWeekAgo.Before(c.LastDone) {
-		return false
+		return InWeek
 	}
-	return true
+	twoWeeksAgo := time.Now().AddDate(0, 0, -14)
+	if twoWeeksAgo.Before(c.LastDone) {
+		return InLastTwoWeeks
+	}
+	return Overdue
 }
+
+const (
+	InWeek         = "green"
+	InLastTwoWeeks = "orange"
+	Overdue        = "red"
+)
