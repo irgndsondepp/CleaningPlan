@@ -114,7 +114,7 @@ func printCleaningPlan(w http.ResponseWriter, formatting cleaningplan.Formatting
 	case cleaningplan.XML:
 		err = printXML(w)
 	default:
-		fmt.Fprintln(w, cleaningPlan.ToString())
+		fmt.Fprintln(w, cleaningplan.BuildHtml(cleaningPlan.ToHtml()))
 	}
 	if err != nil {
 		fmt.Fprintln(w, err)

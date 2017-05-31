@@ -29,3 +29,7 @@ func (m *Mock) MarkAsDone() {
 func (m *Mock) ToString() string {
 	return fmt.Sprintf("Name: %v, LastDone: %v", m.name, m.LastDone)
 }
+
+func (m *Mock) ToHtml() string {
+	return ""
+}

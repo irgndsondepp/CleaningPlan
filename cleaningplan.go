@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"fmt"
+
 	"github.com/irgndsondepp/cleaningplan/people"
 	"github.com/irgndsondepp/cleaningplan/people/tasks"
 )
@@ -94,6 +96,14 @@ func (cp *CleaningPlan) ToXML() ([]byte, error) {
 
 func (cp *CleaningPlan) ToJSON() ([]byte, error) {
 	return json.MarshalIndent(cp, "", "\t")
+}
+
+func (cp *CleaningPlan) ToHtml() string {
+	msg := ""
+	for _, fm := range cp.People {
+		msg += fm.ToHtml()
+	}
+	return fmt.Sprintf("<p>%v</p>", msg)
 }
 
 func FromJSON(bytes []byte) (*CleaningPlan, error) {

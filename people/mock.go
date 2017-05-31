@@ -55,3 +55,7 @@ func (m *Mock) MarkJobAsDone(jobName string) (tasks.Doable, error) {
 func (m *Mock) ToString() string {
 	return fmt.Sprintf("Name: %v, Jobs: %v", m.name, m.Jobs)
 }
+
+func (m *Mock) ToHtml() string {
+	return ""
+}

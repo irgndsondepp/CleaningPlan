@@ -7,6 +7,7 @@ type Doable interface {
 	Name() string
 	MarkAsDone()
 	ToString() string
+	ToHtml() string
 }
 
 type Cleanjob struct {
@@ -32,4 +33,8 @@ func (cj *Cleanjob) Name() string {
 
 func (c *Cleanjob) ToString() string {
 	return fmt.Sprintf("%v (last done on %v)", c.Roomname, c.LastDone)
+}
+
+func (c *Cleanjob) ToHtml() string {
+	return fmt.Sprintf("<p>%v (last done on %v)</p>", c.Roomname, c.LastDone)
 }

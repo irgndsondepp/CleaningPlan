@@ -13,6 +13,7 @@ type People interface {
 	AddJob(job tasks.Doable)
 	MarkJobAsDone(jobName string) (tasks.Doable, error)
 	ToString() string
+	ToHtml() string
 }
 
 type Flatmate struct {
@@ -79,4 +80,16 @@ func (f *Flatmate) ToString() string {
 		msg += fmt.Sprintf("%v is up for cleaning the %v\n", f.PersonName, j.ToString())
 	}
 	return msg
+}
+
+func (f *Flatmate) ToHtml() string {
+	if len(f.Jobs) < 1 {
+		return fmt.Sprintf("<p>Nothing to do for %v</p>", f.PersonName)
+	}
+	msg := ""
+	for _, j := range f.Jobs {
+		msg += fmt.Sprintf("<item>%v</item>", j.ToHtml())
+	}
+	msg = fmt.Sprintf("<ul>%v</ul>", msg)
+	return fmt.Sprintf("<p>%v is up for the following tasks:</p><p>%v</p>", f.PersonName, msg)
 }
