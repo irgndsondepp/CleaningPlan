@@ -6,6 +6,6 @@ import (
 
 type Task interface {
 	GetName() string
-	GetAssignee() Person
+	GetAssignee() string
 	GetDeadline() time.Time
 }

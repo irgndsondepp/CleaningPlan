@@ -2,15 +2,13 @@ package impl
 
 import "time"
 
-import "github.com/irgndsondepp/cleaningplan/interfaces"
-
 type Cleanjob struct {
-	Roomname string            `json:"roomname"`
-	Deadline time.Time         `json:"lastdone"`
-	Assignee interfaces.Person `json:"assignee"`
+	Roomname string    `json:"roomname"`
+	Deadline time.Time `json:"lastdone"`
+	Assignee string    `json:"assignee"`
 }
 
-func NewCleanjob(roomName string, lastDone time.Time, assignee interfaces.Person) *Cleanjob {
+func NewCleanjob(roomName string, lastDone time.Time, assignee string) *Cleanjob {
 	cj := Cleanjob{
 		Roomname: roomName,
 		Deadline: lastDone,
@@ -23,7 +21,7 @@ func (cj *Cleanjob) GetName() string {
 	return cj.Roomname
 }
 
-func (cj *Cleanjob) GetAssignee() interfaces.Person {
+func (cj *Cleanjob) GetAssignee() string {
 	return cj.Assignee
 }
 

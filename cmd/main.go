@@ -9,7 +9,10 @@ var benni = impl.NewFlatmate("Benni")
 var markus = impl.NewFlatmate("Markus")
 var robert = impl.NewFlatmate("Robert")
 var people = []interfaces.Person{benni, markus, robert}
-var tasks = []interfaces.Task{impl.NewCleanjob("Living Room", impl.SimpleDate(2017, 3, 27), benni), impl.NewCleanjob("Bath", impl.SimpleDate(2017, 5, 28), markus), impl.NewCleanjob("Kitchen", impl.SimpleDate(2016, 12, 31), markus)}
+var tasks = []interfaces.Task{
+	impl.NewCleanjob("Living Room", impl.SimpleDate(2017, 3, 27), benni.GetName()),
+	impl.NewCleanjob("Bath", impl.SimpleDate(2017, 5, 28), markus.GetName()),
+	impl.NewCleanjob("Kitchen", impl.SimpleDate(2016, 12, 31), markus.GetName())}
 var filename = "./plan.json"
 
 func main() {

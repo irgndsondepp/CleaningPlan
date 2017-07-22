@@ -1,17 +1,16 @@
 package impl
 
-import "github.com/irgndsondepp/cleaningplan/interfaces"
 import "time"
 
 type SimpleTask struct {
 	Name     string
-	Assignee interfaces.Person
+	Assignee string
 }
 
 func NewSimpleTask(taskName, assignee string) *SimpleTask {
 	return &SimpleTask{
 		Name:     taskName,
-		Assignee: NewSimplePerson(assignee),
+		Assignee: assignee,
 	}
 }
 
@@ -19,7 +18,7 @@ func (s *SimpleTask) GetName() string {
 	return s.Name
 }
 
-func (s *SimpleTask) GetAssignee() interfaces.Person {
+func (s *SimpleTask) GetAssignee() string {
 	return s.Assignee
 }
 

@@ -39,24 +39,24 @@ func (cp *RotatingCleaningPlan) MarkTaskAsDone(doneTask interfaces.Task) error {
 	if dT == nil {
 		return fmt.Errorf("task %v was not found", doneTask.GetName())
 	}
-	if dT.GetAssignee().GetName() != doneTask.GetAssignee().GetName() {
-		return fmt.Errorf("task %v is not assigned to %v", dT.GetName(), doneTask.GetAssignee().GetName())
+	if dT.GetAssignee() != doneTask.GetAssignee() {
+		return fmt.Errorf("task %v is not assigned to %v", dT.GetName(), doneTask.GetAssignee())
 	}
 	newAssignee, err := cp.getNextAssignee(dT.GetAssignee())
 	if err != nil {
 		return err
 	}
-	newTask := NewCleanjob(dT.GetName(), time.Now(), newAssignee)
+	newTask := NewCleanjob(dT.GetName(), time.Now(), newAssignee.GetName())
 	tasks = append(tasks, newTask)
 	cp.Tasks = tasks
 	cp.persistence.Save(cp)
 	return nil
 }
 
-func (cp *RotatingCleaningPlan) getNextAssignee(lastAssignee interfaces.Person) (interfaces.Person, error) {
+func (cp *RotatingCleaningPlan) getNextAssignee(lastAssignee string) (interfaces.Person, error) {
 	index := 0
 	for i, p := range cp.People {
-		if p.GetName() == lastAssignee.GetName() {
+		if p.GetName() == lastAssignee {
 			index = i + 1
 			break
 		}

@@ -64,7 +64,6 @@ func (r *Resthandler) setJobAsDone(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(w, "Error setting job as done: %v\n", err)
 	} else {
-		fmt.Fprintf(w, "Set job as done: %v for %v\n", task.Name, task.Assignee.GetName())
 		updatedPlan, err := r.conv.ConvertTo(r.cp)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
