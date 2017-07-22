@@ -1,7 +1,6 @@
-package cleaningplan
+package impl
 
 import "testing"
-import "github.com/irgndsondepp/cleaningplan/people"
 import "strings"
 
 func TestRotateJob(t *testing.T) {

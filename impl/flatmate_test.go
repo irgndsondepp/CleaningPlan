@@ -1,4 +1,4 @@
-package people
+package impl
 
 import (
 	"strings"

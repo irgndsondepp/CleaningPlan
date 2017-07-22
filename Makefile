@@ -1,14 +1,13 @@
 PKG = cmd
 
 default:
-	build-main
+	build
 
-build-main:
+build:
 	go build $(PKG)/main.go
 
 test:
 	go test
-	go test ./people
-	go test ./people/tasks
+	go test ./impl
 
-.PHONY: build-main
+.PHONY: build
