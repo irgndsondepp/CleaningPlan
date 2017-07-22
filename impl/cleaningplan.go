@@ -36,6 +36,12 @@ func (cp *RotatingCleaningPlan) MarkTaskAsDone(doneTask interfaces.Task) error {
 			tasks = append(tasks, t)
 		}
 	}
+	if dT == nil {
+		return fmt.Errorf("task %v was not found", doneTask.GetName())
+	}
+	if dT.GetAssignee().GetName() != doneTask.GetAssignee().GetName() {
+		return fmt.Errorf("task %v is not assigned to %v", dT.GetName(), doneTask.GetAssignee().GetName())
+	}
 	newAssignee, err := cp.getNextAssignee(dT.GetAssignee())
 	if err != nil {
 		return err
