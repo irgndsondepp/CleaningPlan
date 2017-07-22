@@ -1,13 +1,12 @@
-PKG = cmd
+PKG = cmd/cleaningplan-server
+
+build:
+	go build ./$(PKG)
+
+test:
+	go test ./...
 
 default:
 	build
-
-build:
-	go build $(PKG)/main.go
-
-test:
-	go test
-	go test ./impl
 
 .PHONY: build
