@@ -53,6 +53,26 @@ func (cp *RotatingCleaningPlan) MarkTaskAsDone(doneTask interfaces.Task) error {
 	return nil
 }
 
+func (cp *RotatingCleaningPlan) FilterTasks(filter string) ([]interfaces.Task, error) {
+	var tasks []interfaces.Task
+	exists := false
+	for _, p := range cp.People {
+		if p.GetName() == filter {
+			exists = true
+			break
+		}
+	}
+	if !exists {
+		return nil, fmt.Errorf("Person %v not found in list", filter)
+	}
+	for _, t := range cp.Tasks {
+		if t.GetAssignee() == filter {
+			tasks = append(tasks, t)
+		}
+	}
+	return tasks, nil
+}
+
 func (cp *RotatingCleaningPlan) getNextAssignee(lastAssignee string) (interfaces.Person, error) {
 	index := 0
 	for i, p := range cp.People {

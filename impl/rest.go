@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"encoding/json"
+
 	"github.com/gorilla/mux"
 	"github.com/irgndsondepp/cleaningplan/impl/rest"
 	"github.com/irgndsondepp/cleaningplan/interfaces"
@@ -13,14 +15,12 @@ import (
 type Resthandler struct {
 	router *mux.Router
 	cp     interfaces.Plan
-	conv   *JSONConverter
 }
 
 func NewResthandler(c interfaces.Plan) *Resthandler {
 	return &Resthandler{
 		router: mux.NewRouter().StrictSlash(true),
 		cp:     c,
-		conv:   NewJSONConverter(),
 	}
 }
 
@@ -51,36 +51,66 @@ func (r *Resthandler) createRoutes() []*rest.Route {
 	var routes []*rest.Route
 	routes = append(routes, rest.NewRoute("Get tasks", "GET", "/", r.print))
 	routes = append(routes, rest.NewRoute("Get tasks", "GET", "/tasks", r.print))
+	routes = append(routes, rest.NewRoute("Get filtered tasks", "GET", "/tasks/{assignee}", r.filterTasks))
 	routes = append(routes, rest.NewRoute("Set task done", "PUT", "/tasks/{taskname}/{assignee}", r.setJobAsDone))
 	return routes
+}
+
+func (r *Resthandler) filterTasks(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	name := vars["assignee"]
+	tasks, err := r.cp.FilterTasks(name)
+	if err != nil {
+		returnError(err, http.StatusBadRequest, w)
+	}
+	b := encodeResponse(tasks, w)
+	if b != nil {
+		w.WriteHeader(http.StatusOK)
+		w.Write(b)
+	}
 }
 
 func (r *Resthandler) setJobAsDone(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	task := NewSimpleTask(vars["taskname"], vars["assignee"])
-	w.Header().Add("Content-Type", "application/json")
 	err := r.cp.MarkTaskAsDone(task)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Error setting job as done: %v\n", err)
+		returnError(fmt.Errorf("Error setting job as done: %v", err), http.StatusBadRequest, w)
 	} else {
-		updatedPlan, err := r.conv.ConvertTo(r.cp)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, "Error saving file: %v\n", err)
-		} else {
+		bytes := encodeResponse(r.cp, w)
+		if bytes != nil {
 			w.WriteHeader(http.StatusAccepted)
-			w.Write(updatedPlan)
+			w.Write(bytes)
 		}
 	}
 }
 
 func (r *Resthandler) print(w http.ResponseWriter, req *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	bytes, err := r.conv.ConvertTo(r.cp)
-	if err != nil {
-		//todo error handling
+	bytes := encodeResponse(r.cp, w)
+	if bytes != nil {
+		w.WriteHeader(http.StatusOK)
+		w.Write(bytes)
 	}
-	w.Write(bytes)
+}
+
+func encodeResponse(v interface{}, w http.ResponseWriter) []byte {
+	w.Header().Add("Content-Type", "application/json")
+	bytes, err := json.Marshal(v)
+	if err != nil {
+		returnError(err, http.StatusInternalServerError, w)
+		return nil
+	}
+	return bytes
+}
+
+func returnError(err error, errorCode int, w http.ResponseWriter) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(errorCode)
+	b, _ := json.Marshal(&ErrorResponse{ErrorCode: errorCode, Message: err.Error()})
+	w.Write(b)
+}
+
+type ErrorResponse struct {
+	ErrorCode int    `json:"code"`
+	Message   string `json:"message"`
 }
