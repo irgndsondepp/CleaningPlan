@@ -9,8 +9,8 @@ import (
 )
 
 type RotatingCleaningPlan struct {
-	Tasks       []interfaces.Task   `json:"Tasks"`
-	People      []interfaces.Person `json:"People"`
+	Tasks       []interfaces.Task   `json:"tasks"`
+	People      []interfaces.Person `json:"people"`
 	persistence interfaces.Persistence
 }
 

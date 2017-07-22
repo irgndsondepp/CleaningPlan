@@ -1,7 +1,7 @@
 package impl
 
 type Flatmate struct {
-	Name string `json:"Name"`
+	Name string `json:"name"`
 }
 
 func NewFlatmate(name string) *Flatmate {

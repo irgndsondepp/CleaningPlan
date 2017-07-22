@@ -5,9 +5,9 @@ import "time"
 import "github.com/irgndsondepp/cleaningplan/interfaces"
 
 type Cleanjob struct {
-	Roomname string            `json:"RoomName"`
-	Deadline time.Time         `json:"LastDone"`
-	Assignee interfaces.Person `json:"Assignee"`
+	Roomname string            `json:"roomname"`
+	Deadline time.Time         `json:"lastdone"`
+	Assignee interfaces.Person `json:"assignee"`
 }
 
 func NewCleanjob(roomName string, lastDone time.Time, assignee interfaces.Person) *Cleanjob {
