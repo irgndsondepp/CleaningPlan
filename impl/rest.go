@@ -62,8 +62,9 @@ func (r *Resthandler) filterTasks(w http.ResponseWriter, req *http.Request) {
 	tasks, err := r.cp.FilterTasks(name)
 	if err != nil {
 		returnError(err, http.StatusBadRequest, w)
+	} else {
+		encodeResponse(tasks, http.StatusOK, w)
 	}
-	encodeResponse(tasks, http.StatusOK, w)
 }
 
 func (r *Resthandler) setJobAsDone(w http.ResponseWriter, req *http.Request) {
