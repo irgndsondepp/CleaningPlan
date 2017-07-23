@@ -63,11 +63,7 @@ func (r *Resthandler) filterTasks(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		returnError(err, http.StatusBadRequest, w)
 	}
-	b := encodeResponse(tasks, w)
-	if b != nil {
-		w.WriteHeader(http.StatusOK)
-		w.Write(b)
-	}
+	encodeResponse(tasks, http.StatusOK, w)
 }
 
 func (r *Resthandler) setJobAsDone(w http.ResponseWriter, req *http.Request) {
@@ -77,30 +73,22 @@ func (r *Resthandler) setJobAsDone(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		returnError(fmt.Errorf("Error setting job as done: %v", err), http.StatusBadRequest, w)
 	} else {
-		bytes := encodeResponse(r.cp, w)
-		if bytes != nil {
-			w.WriteHeader(http.StatusAccepted)
-			w.Write(bytes)
-		}
+		encodeResponse(r.cp.GetTasks(), http.StatusAccepted, w)
 	}
 }
 
 func (r *Resthandler) print(w http.ResponseWriter, req *http.Request) {
-	bytes := encodeResponse(r.cp, w)
-	if bytes != nil {
-		w.WriteHeader(http.StatusOK)
-		w.Write(bytes)
-	}
+	encodeResponse(r.cp.GetTasks(), http.StatusOK, w)
 }
 
-func encodeResponse(v interface{}, w http.ResponseWriter) []byte {
+func encodeResponse(v interface{}, statusCode int, w http.ResponseWriter) {
 	w.Header().Add("Content-Type", "application/json")
 	bytes, err := json.Marshal(v)
 	if err != nil {
 		returnError(err, http.StatusInternalServerError, w)
-		return nil
 	}
-	return bytes
+	w.WriteHeader(statusCode)
+	w.Write(bytes)
 }
 
 func returnError(err error, errorCode int, w http.ResponseWriter) {

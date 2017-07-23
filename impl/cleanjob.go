@@ -4,7 +4,7 @@ import "time"
 
 type Cleanjob struct {
 	Roomname string    `json:"roomname"`
-	Deadline time.Time `json:"lastdone"`
+	Deadline time.Time `json:"deadline"`
 	Assignee string    `json:"assignee"`
 }
 

@@ -43,6 +43,13 @@ localhost:8080/tasks
 ```
 
 If nothing else is specified, this outputs the currently assigned Tasks and when they were last completed in a JSON format.
+
+```
+localhost:8080/tasks/<assigneename>
+```
+
+Filters the list of tasks by assignee name.
+
 All other requests will recieve a 404 error.
 
 #### PUT
